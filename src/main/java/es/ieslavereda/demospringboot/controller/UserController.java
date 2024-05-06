@@ -1,0 +1,82 @@
+package es.ieslavereda.demospringboot.controller;
+
+import es.ieslavereda.demospringboot.model.User;
+import es.ieslavereda.demospringboot.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+@RequestMapping("/api/v1")
+
+@RestController
+public class UserController {
+
+    private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
+
+    @Autowired
+    private  UserService userService;
+
+    @GetMapping("users")
+    public ResponseEntity<?> getUsers() {
+        LOG.log(Level.INFO, "Obteniendo todos los usuarios");
+        try {
+
+
+            return userService.getAllUSers();
+
+        }catch (Exception e){
+            return new ArrayList<>();
+        }
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getUser(@PathVariable Integer id) {
+        try {
+            User user=userService.getUserByID(id);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }catch (Exception e) {
+            return getResposeError(e);
+        }
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        try {
+            User createdUser = userService.createUser(user);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        }catch (Exception e) {
+            return getResposeError(e);
+        }
+    }
+
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity<?> deleteUser(@RequestBody Integer id) {
+        LOG.log(Level.INFO, "Eliminando el usuario" + id);
+        try {
+             User user= userService.deleteUser(id);
+             return new ResponseEntity<>(user, HttpStatus.OK);
+        }catch (Exception e) {
+            return getResposeError(e);
+        }
+    }
+    private ResponseEntity<?> getResposeError(Exception e) {
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",String.valueOf(e.getCause()));
+        errors.put("message", e.getMessage());
+
+        return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PutMapping("/user")
+    public User updateUser(@RequestBody User user) {
+        return userService.updateUSer(user);
+    }
+}
