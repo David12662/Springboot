@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-@RequestMapping("/api/v1")
+
 
 @RestController
-public class UserController {
+public class UserController extends BaseController {
 
     private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
 
@@ -28,13 +28,13 @@ public class UserController {
     public ResponseEntity<?> getUsers() {
         LOG.log(Level.INFO, "Obteniendo todos los usuarios");
         try {
-
-
-            return userService.getAllUSers();
-
+            List<User> users = userService.getAllUSers();
+            return new ResponseEntity<>(users, HttpStatus.OK);
         }catch (Exception e){
-            return new ArrayList<>();
+            return new ResponseEntity<>("Error al obtener los usuarios", HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
+
     }
 
     @GetMapping("/user/{id}")
@@ -66,13 +66,6 @@ public class UserController {
         }catch (Exception e) {
             return getResposeError(e);
         }
-    }
-    private ResponseEntity<?> getResposeError(Exception e) {
-        Map<String,String> errors = new HashMap<>();
-        errors.put("error",String.valueOf(e.getCause()));
-        errors.put("message", e.getMessage());
-
-        return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @PutMapping("/user")
